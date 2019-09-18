@@ -53,7 +53,7 @@ for the HTML help system to fully function also add
 
 now put all `*.sc` files in sclang's library path, e.g. if you put them
 in a non-standard location, such as `~/SuperCollider/Emacs`, add the
-following to `~/.config/SuperCollider/sclang.conf.yaml`:
+following to `~/.config/SuperCollider/sclang_conf.yaml` (Linux) or `~/Library/Application Support/SuperCollider/sclang_conf.yaml` (macOS):
 
 ```
 includePaths:
