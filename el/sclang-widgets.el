@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2005  Free Software Foundation, Inc.
 
-;; Author: mlang <mlang@delysid.org>
+;; Author: Mario Lang <mlang@blind.guru>
 ;; Keywords: comm
 
 ;; This file is free software; you can redistribute it and/or modify
