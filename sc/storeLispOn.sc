@@ -116,4 +116,18 @@
 	}
 }
 
++ SCDocNode {
+	storeLispOn { arg stream;
+		stream.put($();
+		id.storeLispOn(stream);
+		stream.space;
+		text.storeLispOn(stream);
+		children.do {|child|
+			stream.space;
+			child.storeLispOn(stream);
+		};
+		stream.put($));
+	}
+}
+
 // EOF
