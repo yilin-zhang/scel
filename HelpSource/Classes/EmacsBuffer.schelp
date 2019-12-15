@@ -1,0 +1,140 @@
+CLASS:: EmacsBuffer
+summary:: Lightweight Emacs User Interface
+categories:: Frontends
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a new Emacs buffer with the specified name.
+If a buffer with the same name already exists, it is cleared.
+
+ARGUMENT:: name
+The name of the new buffer.
+Convention has it that generated buffers (those which do not belong
+to a file) should start and end with an asterisk *.
+
+METHOD:: at
+Retrieve an instance by its name.
+
+ARGUMENT:: name
+The name of the buffer.
+
+INSTANCEMETHODS::
+
+METHOD:: front
+Switch to this buffer in Emacs, making it the current buffer.
+
+CODE::
+p = EmacsBuffer.new;
+p.front;
+::
+
+METHOD:: defineKey
+
+ARGUMENT:: keySeq
+A key sequence.
+
+ARGUMENT:: func
+A function to call when that key sequence is invoked.
+
+CODE::
+// create a key action for the buffer:
+p.defineKey( "hello", { "hey there".postln; } );
+
+// type hello on the window and look at the postbuffer
+p.front;
+
+p.defineKey( "hey there", { "hello".postln; } );
+
+// type hey there and look at the postbuffer
+p.front;
+::
+
+METHOD:: insert
+Insert text.
+
+ARGUMENT:: string
+The text which should be inserted.
+
+CODE::
+// put some text in the buffer:
+
+p.insert( "this is a really interesting text to read in the buffer" );
+p.front;
+::
+
+METHOD:: newline
+Insert a newline.
+
+CODE::
+p.newline;
+p.front;
+::
+
+METHOD:: gotoBob
+Move the cursor (point in Emacs jargon) to thr beginning of the buffer.
+
+METHOD:: gotoEob
+Move point to the end of the buffer.
+
+METHOD:: goto
+Move point to a specific character position.
+
+ARGUMENT:: position
+An integer.
+
+METHOD:: button
+Create a multistate button.
+
+ARGUMENT:: states
+An array of state names.
+
+ARGUMENT:: action
+A function to call when the button state changes.
+
+ARGUMENT:: prefix
+Text to insert before the current state.
+
+ARGUMENT:: suffix
+Text to insert after the current state.
+
+CODE::
+// make a button:
+
+p.button( [ "on", "off", "in between" ], { |v| v.postln; } );
+p.front;
+
+// make a button with a different look:
+p.button( [ "on", "off", "in between" ], { |v| v.postln; }, "******", "+++++" );
+p.front;
+::
+
+METHOD:: closeButton
+Create a button which will close this buffer.
+
+CODE::
+p.closeButton;
+p.front;
+::
+
+METHOD:: editableField
+Create a field which can be edited inline.
+
+ARGUMENT:: tag
+The label of the field.
+
+ARGUMENT:: value
+The default content, a string.
+
+ARGUMENT:: action
+A function to call when the user submits the content by pressing enter.
+
+CODE::
+p = EmacsBuffer.new;
+p.editableField( "write something here", "like this?", { |v| v.postln; } );
+p.front;
+::
+
+METHOD:: free
+Close this buffer.
+
