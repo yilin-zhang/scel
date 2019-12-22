@@ -72,7 +72,7 @@ p.front;
 ::
 
 METHOD:: gotoBob
-Move the cursor (point in Emacs jargon) to thr beginning of the buffer.
+Move the cursor (point in Emacs jargon) to the beginning of the buffer.
 
 METHOD:: gotoEob
 Move point to the end of the buffer.
