@@ -444,7 +444,8 @@ Change this if \"cat\" has a non-standard name or location."
     (while (and (> (length string) 3)
 		(>= (length string)
 		    (setq end (+ 4 (sclang-string-to-int32 string)))))
-      (sclang-handle-command-result (car (read-from-string string 4 end)))
+      (sclang-handle-command-result
+       (read (string-as-multibyte (substring string 4 end))))
       (setq string (substring string end))))
   (setq sclang-command-process-previous string))
 
