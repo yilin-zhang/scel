@@ -16,10 +16,8 @@
 ;; USA
 
 (eval-when-compile
-  (require 'cl)
   (require 'sclang-util)
-  (require 'compile)
-  )
+  (require 'compile))
 
 ;; =====================================================================
 ;; post buffer access
@@ -143,18 +141,18 @@ If EOB-P is non-nil, positions cursor at end of buffer."
   :version "21.3"
   :type 'string)
 
-(defcustom sclang-runtime-directory ""
-  "*Path to the SuperCollider runtime directory."
+(defcustom sclang-runtime-directory nil
+  "Path to the SuperCollider runtime directory."
   :group 'sclang-options
   :version "21.3"
-  :type 'directory
+  :type '(choice (const nil) directory)
   :options '(:must-match))
 
-(defcustom sclang-library-configuration-file ""
-  "*Path of the library configuration file."
+(defcustom sclang-library-configuration-file nil
+  "Path of the library configuration file."
   :group 'sclang-options
   :version "21.3"
-  :type 'file
+  :type '(choice (const nil) file)
   :options '(:must-match))
 
 (defcustom sclang-heap-size ""
@@ -169,11 +167,11 @@ If EOB-P is non-nil, positions cursor at end of buffer."
   :version "21.3"
   :type 'string)
 
-(defcustom sclang-udp-port -1
-  "*UDP listening port."
+(defcustom sclang-udp-port nil
+  "UDP listening port."
   :group 'sclang-options
   :version "21.3"
-  :type 'integer)
+  :type '(choice (const :tag "Default" nil) integer))
 
 (defcustom sclang-main-run nil
   "*Call Main.run on startup."
@@ -282,30 +280,28 @@ If EOB-P is non-nil, positions cursor at end of buffer."
     (string-match "^[1-9][0-9]*[km]?$" string)))
 
 (defun sclang-port-option-p (number)
-  (and (>= number 0) (<= number #XFFFF)))
+  (and (integerp number) (>= number 0) (<= number #XFFFF)))
 
 (defun sclang-make-options ()
-  (let ((default-directory "")
-	(res ()))
-    (cl-flet ((append-option
-	    (option &optional value)
-	    (setq res (append res (list option) (and value (list value))))))
-      (if (file-directory-p sclang-runtime-directory)
-	  (append-option "-d" (expand-file-name sclang-runtime-directory)))
-      (if (file-exists-p sclang-library-configuration-file)
-	  (append-option "-l" (expand-file-name sclang-library-configuration-file)))
-      (if (sclang-memory-option-p sclang-heap-size)
-	  (append-option "-m" sclang-heap-size))
-      (if (sclang-memory-option-p sclang-heap-growth)
-	  (append-option "-g" sclang-heap-growth))
-      (if (sclang-port-option-p sclang-udp-port)
-	  (append-option "-u" (number-to-string sclang-udp-port)))
-      (if sclang-main-run
-	  (append-option "-r"))
-      (if sclang-main-stop
-	  (append-option "-s"))
-      (append-option "-iscel")
-      res)))
+  (let ((default-directory ""))
+    (append
+     (when (and sclang-runtime-directory
+		(file-directory-p sclang-runtime-directory))
+       (list "-d" (expand-file-name sclang-runtime-directory)))
+     (when (and sclang-library-configuration-file
+		(file-exists-p sclang-library-configuration-file))
+       (list "-l" (expand-file-name sclang-library-configuration-file)))
+     (when (sclang-memory-option-p sclang-heap-size)
+       (list "-m" sclang-heap-size))
+     (when (sclang-memory-option-p sclang-heap-growth)
+       (list "-g" sclang-heap-growth))
+     (when (sclang-port-option-p sclang-udp-port)
+       (list "-u" (number-to-string sclang-udp-port)))
+     (when sclang-main-run
+       (list "-r"))
+     (when sclang-main-stop
+       (list "-s"))
+     (list "-iscel"))))
 
 (defun sclang-start ()
   "Start SuperCollider process."
@@ -595,8 +591,7 @@ if PRINT-P is non-nil. Return STRING if successful, otherwise nil."
 	(let ((time (current-time)) (tick 10000) elt)
 	  (sclang-perform-command 'evalSCLang string time)
 	  (while (and (> (decf tick) 0)
-		      (not (setq elt (find time sclang-eval-results
-					   :key #'car :test #'equal))))
+		      (not (setq elt (assoc time sclang-eval-results))))
 	    (accept-process-output proc 0 100))
 	  (if elt
 	      (prog1 (if (eq (nth 1 elt) 'ok)
