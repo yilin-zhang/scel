@@ -16,10 +16,10 @@
 ;; USA
 
 (eval-when-compile
-  (require 'cl)
   (require 'font-lock))
 
 ;; (require 'w3m) ;; not needed during compilation
+(require 'cl-lib)
 (require 'sclang-util)
 (require 'sclang-interp)
 (require 'sclang-language)
@@ -36,7 +36,7 @@
 
 (defcustom sclang-help-path (list sclang-system-help-dir
 				  "~/.local/share/SuperCollider/Help")
-  "*List of directories where SuperCollider help files are kept."
+  "List of directories where SuperCollider help files are kept."
   :group 'sclang-interface
   :version "21.4"
   :type '(repeat directory))
@@ -46,7 +46,7 @@
   "List of SuperCollider extension directories.")
 
 (defcustom sclang-help-fill-column fill-column
-  "*Column beyond which automatic line-wrapping in RTF help files should happen."
+  "Column beyond which automatic line-wrapping in RTF help files should happen."
   :group 'sclang-interface
   :version "21.3"
   :type 'integer)
@@ -177,10 +177,10 @@
 			      (Helvetica-Bold . variable-pitch)
 			      (Monaco . nil)))
 
-(defstruct sclang-rtf-state
+(cl-defstruct sclang-rtf-state
   output font-table font face pos)
 
-(macrolet ((rtf-p (pos) `(plist-get (text-properties-at ,pos) 'rtf-p)))
+(cl-macrolet ((rtf-p (pos) `(plist-get (text-properties-at ,pos) 'rtf-p)))
   (defun sclang-rtf-p (pos) (rtf-p pos))
   (defun sclang-code-p (pos) (not (rtf-p pos))))
 
@@ -416,16 +416,15 @@
 (defun sclang-skip-help-directory-p (path)
   "Answer t if PATH should be skipped during help file indexing."
   (let ((directory (file-name-nondirectory path)))
-    (reduce (lambda (a b) (or a b))
-	    (mapcar (lambda (regexp) (string-match regexp directory))
-		    '("^\.$" "^\.\.$" "^CVS$" "^\.svn$" "^_darcs$")))))
+    (cl-some (lambda (regexp) (string-match regexp directory))
+	     '("^\.$" "^\.\.$" "^CVS$" "^\.svn$" "^_darcs$"))))
 
 (defun sclang-filter-help-directories (list)
   "Remove paths to be skipped from LIST of directories."
-  (remove-if (lambda (x)
-	       (or (not (file-directory-p x))
-		   (sclang-skip-help-directory-p x)))
-	     list))
+  (cl-remove-if (lambda (x)
+		  (or (not (file-directory-p x))
+		      (sclang-skip-help-directory-p x)))
+		list))
 
 (defun sclang-directory-files-save (directory &optional full match nosort)
   "Return a list of names of files in DIRECTORY, or nil on error."
@@ -464,8 +463,8 @@
   "Build a help topic alist from directories in DIRS, with initial RESULT."
   (if dirs
       (let* ((files (sclang-directory-files-save (car dirs) t))
-	     (topics (remove-if 'null (mapcar 'sclang-help-topic-name files)))
-	     (new-dirs	(sclang-filter-help-directories files)))
+	     (topics (remq nil (mapcar 'sclang-help-topic-name files)))
+	     (new-dirs (sclang-filter-help-directories files)))
 	(sclang-make-help-topic-alist
 	 (append new-dirs (cdr dirs))
 	 (append topics result)))

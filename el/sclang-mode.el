@@ -15,9 +15,9 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 ;; USA
 
+(require 'cl-lib)
+
 (eval-when-compile
-  (require 'cl)
-  (load "cl-seq" nil t)
   (require 'font-lock)
   (require 'sclang-util))
 
@@ -255,7 +255,7 @@
         (let ((thing (thing-at-point 'word)))
           (if (null thing)
               (setq res nil continue nil)
-            (when (position (substring-no-properties thing) sclang-class-list :test 'equal)
+            (when (cl-position (substring-no-properties thing) sclang-class-list :test 'equal)
               (setq continue nil))))))
     res))
 
@@ -450,10 +450,7 @@ Returns the column to indent to."
     (sclang-document-edited-p . (prSetEdited (buffer-modified-p)))))
 
 (defmacro sclang-next-document-id ()
-  `(incf sclang-document-counter))
-
-(defun sclang-document-list ()
-  sclang-document-list)
+  `(cl-incf sclang-document-counter))
 
 (defun sclang-document-id (buffer)
   (cdr (assq 'sclang-document-id (buffer-local-variables buffer))))
@@ -467,15 +464,15 @@ Returns the column to indent to."
        ,@body)))
 
 (defun sclang-get-document (id)
-  (find-if (lambda (doc) (eq id (sclang-document-id doc)))
-	   (sclang-document-list)))
+  (cl-find-if (lambda (buffer) (eq id (sclang-document-id buffer)))
+	      sclang-document-list))
 
 (defun sclang-init-document ()
   (set (make-local-variable 'sclang-document-id) (sclang-next-document-id))
   (set (make-local-variable 'sclang-document-envir) nil)
   (dolist (assoc sclang-document-property-map)
     (set (make-local-variable (car assoc)) nil))
-  (pushnew (current-buffer) sclang-document-list))
+  (cl-pushnew (current-buffer) sclang-document-list))
 
 (defun sclang-document-update-property-1 (assoc &optional force)
   (when (consp assoc)
@@ -514,7 +511,7 @@ Returns the column to indent to."
     t))
 
 (defun sclang-document-library-startup-hook-function ()
-  (dolist (buffer (sclang-document-list))
+  (dolist (buffer sclang-document-list)
     (with-current-buffer buffer
       (sclang-make-document)))
   (sclang-set-current-document (current-buffer) t))

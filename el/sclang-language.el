@@ -15,9 +15,7 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 ;; USA
 
-(eval-when-compile
-  (require 'cl))
-
+(require 'cl-lib)
 (require 'sclang-browser)
 (require 'sclang-interp)
 (require 'sclang-util)
@@ -219,8 +217,8 @@ low-resource systems."
  'symbolTable
  (lambda (arg)
    (when (and sclang-use-symbol-table arg)
-     (setq sclang-symbol-table (sort arg 'string<))
-     (setq sclang-class-list (remove-if
+     (setq sclang-symbol-table (sort arg 'string-lessp))
+     (setq sclang-class-list (cl-remove-if
                               (lambda (x) (or (not (sclang-class-name-p x))
                                               (sclang-string-match "^Meta_" x)))
                               sclang-symbol-table))
@@ -753,46 +751,46 @@ current-directory, iff `sclang-source-directoy' is nil."
 Looks for all repetitive patterns in ITEMS recursively.  Therefore, it is
 computationally expensive, especially when ITEMS is a long list.  If you don't
 want smart pattern guessing, use `sclang-format' directly to format your Pseq."
-  (cl-flet ((find-reps (items)
-	   (let (r)
-	     (while items
-	       (let ((ret (car items))
-		     (skip 1)
-		     (rep (length items)))
-		 (catch 'match-found
-		   (while (>= rep 2)
-		     (let ((i (/ (length items) rep)))
-		       (while (> i 0)
-			 (let ((sublst (subseq items 0 i)))
-			   (when (catch 'equal
-				   (let ((a items))
-				     (loop repeat rep do
-					   (let ((b sublst))
-					     (while b
-					       (unless (eql (car b) (car a))
-						 (throw 'equal nil))
-					       (setq a (cdr a)
-						     b (cdr b)))))
-				     t))
-			     (setq ret (cons rep (if (> i 5)
-						     (find-reps sublst)
-						   sublst))
-				   skip (* i rep))
-			     (throw 'match-found t))
-			   (decf i))))
-		     (decf rep)))
-		 (accept-process-output nil 0 100)
-		 (message "Processed...%S" ret) ;; invent better progress info
-		 (setq r (append r (list ret))
-		       items (nthcdr skip items))))
-	     r))
-	 (elem-to-string (elem)
-	   (cond
-	    ((consp elem)
-	     (concat "Pseq([ "
-		     (mapconcat #'elem-to-string (cdr elem) ", ")
-		     (format " ], %d)" (car elem))))
-	    (t (sclang-object-to-string elem)))))
+  (cl-labels ((find-reps (items)
+	       (let (r)
+		 (while items
+		   (let ((ret (car items))
+			 (skip 1)
+			 (rep (length items)))
+		     (catch 'match-found
+		       (while (>= rep 2)
+			 (let ((i (/ (length items) rep)))
+			   (while (> i 0)
+			     (let ((sublst (cl-subseq items 0 i)))
+			       (when (catch 'equal
+				       (let ((a items))
+					 (cl-loop repeat rep do
+						  (let ((b sublst))
+						    (while b
+						      (unless (eql (car b) (car a))
+							(throw 'equal nil))
+						      (setq a (cdr a)
+							    b (cdr b)))))
+					 t))
+				 (setq ret (cons rep (if (> i 5)
+							 (find-reps sublst)
+						       sublst))
+				       skip (* i rep))
+				 (throw 'match-found t))
+			       (cl-decf i))))
+			 (cl-decf rep)))
+		     (accept-process-output nil 0 100)
+		     (message "Processed...%S" ret) ;; invent better progress info
+		     (setq r (append r (list ret))
+			   items (nthcdr skip items))))
+		 r))
+	      (elem-to-string (elem)
+	       (cond
+		((consp elem)
+		 (concat "Pseq([ "
+			 (mapconcat #'elem-to-string (cdr elem) ", ")
+			 (format " ], %d)" (car elem))))
+		(t (sclang-object-to-string elem)))))
     (let ((compressed (find-reps items)))
       (if (and (= (length compressed) 1) (consp (car compressed)))
 	  (elem-to-string (car compressed))
