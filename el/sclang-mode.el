@@ -535,7 +535,7 @@ Returns the column to indent to."
 (sclang-set-command-handler
  '_documentOpen
  (lambda (arg)
-   (multiple-value-bind (file-name region-start region-length) arg
+   (cl-multiple-value-bind (file-name region-start region-length) arg
      (let ((buffer (get-file-buffer file-name)))
        (unless buffer
 	 (setf buffer (find-file-noselect file-name)))
@@ -549,7 +549,7 @@ Returns the column to indent to."
 (sclang-set-command-handler
  '_documentNew
  (lambda (arg)
-   (multiple-value-bind (name str make-listener) arg
+   (cl-multiple-value-bind (name str make-listener) arg
      (let ((buffer (generate-new-buffer name)))
        (with-current-buffer buffer
 	 (insert str)
@@ -567,7 +567,7 @@ Returns the column to indent to."
 (sclang-set-command-handler
  '_documentRename
  (lambda (arg)
-   (multiple-value-bind (id name) arg
+   (cl-multiple-value-bind (id name) arg
      (when (stringp name)
        (let ((doc (and (integerp id) (sclang-get-document id))))
 	 (when doc
@@ -579,7 +579,7 @@ Returns the column to indent to."
 (sclang-set-command-handler
  '_documentSetEditable
  (lambda (arg)
-   (multiple-value-bind (id flag) arg
+   (cl-multiple-value-bind (id flag) arg
      (let ((doc (and (integerp id) (sclang-get-document id))))
        (when doc
 	 (with-current-buffer doc
@@ -597,7 +597,7 @@ Returns the column to indent to."
 (sclang-set-command-handler
  '_documentPutString
 (lambda (arg)
-   (multiple-value-bind (id str) arg
+   (cl-multiple-value-bind (id str) arg
      (let ((doc (and (integerp id) (sclang-get-document id))))
        (when doc
 	 (with-current-buffer doc
