@@ -284,7 +284,7 @@ If EOB-P is non-nil, positions cursor at end of buffer."
 
 (defun sclang-make-options ()
   (let ((default-directory ""))
-    (append
+    (nconc
      (when (and sclang-runtime-directory
 		(file-directory-p sclang-runtime-directory))
        (list "-d" (expand-file-name sclang-runtime-directory)))
@@ -337,7 +337,7 @@ If EOB-P is non-nil, positions cursor at end of buffer."
 	  (i 0))
       (while (and (sclang-get-process)
 		  (< i tries))
-	(incf i)
+	(cl-incf i)
 	(sit-for 0.5))))
   (sclang-kill)
   (sclang-stop-command-process))
@@ -441,7 +441,7 @@ Change this if \"cat\" has a non-standard name or location."
 		(>= (length string)
 		    (setq end (+ 4 (sclang-string-to-int32 string)))))
       (sclang-handle-command-result
-       (read (string-as-multibyte (substring string 4 end))))
+       (read (decode-coding-string (substring string 4 end) 'utf-8)))
       (setq string (substring string end))))
   (setq sclang-command-process-previous string))
 
@@ -590,7 +590,7 @@ if PRINT-P is non-nil. Return STRING if successful, otherwise nil."
     (if (and (processp proc) (eq (process-status proc) 'run))
 	(let ((time (current-time)) (tick 10000) elt)
 	  (sclang-perform-command 'evalSCLang string time)
-	  (while (and (> (decf tick) 0)
+	  (while (and (> (cl-decf tick) 0)
 		      (not (setq elt (assoc time sclang-eval-results))))
 	    (accept-process-output proc 0 100))
 	  (if elt

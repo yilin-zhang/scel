@@ -391,7 +391,7 @@ A defun may either be a class definition or a code block, see
 `sclang-beginning-of-defun-regexp'."
   (save-excursion
     (with-syntax-table sclang-mode-syntax-table
-      (multiple-value-bind (beg end) (sclang-point-in-defun-p)
+      (cl-multiple-value-bind (beg end) (sclang-point-in-defun-p)
 	(and beg end (buffer-substring-no-properties beg end))))))
 
 ;; =====================================================================
