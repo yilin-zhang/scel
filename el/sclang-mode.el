@@ -15,7 +15,14 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 ;; USA
 
+;;; Code:
+
 (require 'cl-lib)
+
+;; Make byte-compiler happy by declaring external functions and
+;; variables.
+(declare-function company-mode "ext:company")
+(defvar company-backends)
 
 (eval-when-compile
   (require 'font-lock)
@@ -125,7 +132,6 @@
   (define-key map "\C-c\C-f"		'sclang-eval-document)
   ;; language information
   (define-key map "\C-c\C-n"		'sclang-complete-symbol)
-  (define-key map "\M-\t"			'sclang-complete-symbol)
   (define-key map "\C-c:"			'sclang-find-definitions)
   (define-key map "\C-c;"			'sclang-find-references)
   (define-key map "\C-c}"			'sclang-pop-definition-mark)
@@ -667,8 +673,7 @@ Returns the column to indent to."
 
 (defun sclang-mode ()
   "Major mode for editing SuperCollider language code.
-\\{sclang-mode-map}
-"
+\\{sclang-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (set-syntax-table sclang-mode-syntax-table)
@@ -679,6 +684,13 @@ Returns the column to indent to."
   (sclang-set-font-lock-keywords)
   (sclang-init-document)
   (sclang-make-document)
+
+  ;; Setup completion
+  (add-hook 'completion-at-point-functions
+            #'sclang-completion-at-point nil 'local)
+  (when (fboundp 'company-mode)
+    (add-to-list 'company-backends 'company-capf))
+
   (run-hooks 'sclang-mode-hook))
 
 ;; =====================================================================

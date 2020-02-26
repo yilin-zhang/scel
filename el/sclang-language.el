@@ -453,6 +453,24 @@ are considered."
 		(insert " \n"))))
 	   (sclang-message "Making completion list...%s" "done")))))
 
+(defun sclang-completion-at-point ()
+  "Function used for `completion-at-point-functions' in `sclang-mode'."
+  (let* ((end (point))
+	 (beg (save-excursion
+		(backward-sexp 1)
+		(skip-syntax-forward "'")
+		(point)))
+	 (pattern (buffer-substring-no-properties beg end))
+	 (case-fold-search nil)
+	 (predicate (if (sclang-class-name-p pattern)
+                        #'sclang-class-name-p
+                      #'sclang-method-name-p)))
+    (list beg
+          end
+          (all-completions pattern sclang-symbol-table predicate)
+          :exclusive 'no
+          :company-docsig #'identity)))
+
 ;; =====================================================================
 ;; introspection
 ;; =====================================================================
