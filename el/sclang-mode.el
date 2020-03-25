@@ -671,15 +671,12 @@ Returns the column to indent to."
   :group 'sclang-mode
   :type 'hook)
 
-(defun sclang-mode ()
+;;;###autoload
+(define-derived-mode sclang-mode prog-mode "SCLang"
   "Major mode for editing SuperCollider language code.
 \\{sclang-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (set-syntax-table sclang-mode-syntax-table)
-  (use-local-map sclang-mode-map)
-  (setq mode-name "SCLang")
-  (setq major-mode 'sclang-mode)
+  :group 'sclang
+  :syntax-table sclang-mode-syntax-table
   (sclang-mode-set-local-variables)
   (sclang-set-font-lock-keywords)
   (sclang-init-document)
@@ -689,15 +686,14 @@ Returns the column to indent to."
   (add-hook 'completion-at-point-functions
             #'sclang-completion-at-point nil 'local)
   (when (fboundp 'company-mode)
-    (add-to-list 'company-backends 'company-capf))
-
-  (run-hooks 'sclang-mode-hook))
+    (add-to-list 'company-backends 'company-capf)))
 
 ;; =====================================================================
 ;; module initialization
 ;; =====================================================================
 
-(add-to-list 'auto-mode-alist '("\\.\\(sc\\|scd\\)$" . sclang-mode))
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.scd?\\'" . sclang-mode))
 (add-to-list 'interpreter-mode-alist '("sclang" . sclang-mode))
 
 (add-hook 'sclang-library-startup-hook 'sclang-document-library-startup-hook-function)
@@ -706,5 +702,4 @@ Returns the column to indent to."
 (add-hook 'change-major-mode-hook 'sclang-document-change-major-mode-hook-function)
 
 (provide 'sclang-mode)
-
-;; EOF
+;;; sclang-mode ends here
