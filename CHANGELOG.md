@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - `M-<tab>` or `C-M-i` is no longer bound to `sclang-complete-symbol`
    to make builtin completion work as expected.
+ - `sclang-mode` is now derived from `prog-mode`.
