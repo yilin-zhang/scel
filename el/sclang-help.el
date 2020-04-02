@@ -192,9 +192,9 @@
   `(push (cons ,font-id (intern ,font-name)) (sclang-rtf-state-font-table ,state)))
 
 (defmacro sclang-rtf-state-apply (state)
-  (let ((pos (gensym))
-	(font (gensym))
-	(face (gensym)))
+  (let ((pos (cl-gensym))
+	(font (cl-gensym))
+	(face (cl-gensym)))
     `(with-current-buffer (sclang-rtf-state-output ,state)
        (let ((,pos (or (sclang-rtf-state-pos ,state) (point-min)))
 	     (,font (cdr (assq
@@ -216,7 +216,7 @@
      (setf (sclang-rtf-state-font ,state) ,font)))
 
 (defmacro sclang-rtf-state-push-face (state face)
-  (let ((list (gensym)))
+  (let ((list (cl-gensym)))
     `(let ((,list (sclang-rtf-state-face state)))
        (sclang-rtf-state-apply ,state)
        (unless (memq ,face ,list)
@@ -224,7 +224,7 @@
 	       (append ,list (list ,face)))))))
 
 (defmacro sclang-rtf-state-pop-face (state face)
-  (let ((list (gensym)))
+  (let ((list (cl-gensym)))
     `(let* ((,list (sclang-rtf-state-face ,state)))
        (sclang-rtf-state-apply ,state)
        (setf (sclang-rtf-state-face ,state) (delq ,face ,list)))))
@@ -326,9 +326,9 @@
   (define-key map "\C-c\C-v" 'sclang-edit-help-file))
 
 (defmacro sclang-help-mode-limit-point-to-code (&rest body)
-  (let ((min (gensym))
-	(max (gensym))
-	(res (gensym)))
+  (let ((min (cl-gensym))
+	(max (cl-gensym))
+	(res (cl-gensym)))
     `(if (and (sclang-code-p (point))
 	      (not (or (bobp) (eobp)))
 	      (sclang-code-p (1- (point)))
