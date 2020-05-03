@@ -19,6 +19,8 @@
   (require 'sclang-util)
   (require 'compile))
 
+(require 'highlight)
+
 ;; =====================================================================
 ;; post buffer access
 ;; =====================================================================
@@ -51,6 +53,20 @@ Default behavior is to only scroll when point is not at end of buffer."
   :group 'sclang-interface
   :version "21.3"
   :type 'boolean)
+
+(defface eval-sclang-flash
+  '((((class color)) (:background "#D4D4D4" :foreground "white" :bold nil))
+    (t (:inverse-video t)))
+  "Face for highlighting sexps during evaluation."
+  :group 'eval-sclang)
+
+(defface eval-sclang-flash-error
+  '((((class color)) (:foreground "red" :bold nil))
+    (t (:inverse-video t)))
+  "Face for highlighting sexps signaled errors during evaluation."
+  :group 'eval-sclang)
+
+(defvar flash-time 0.5)
 
 (defun sclang-get-post-buffer ()
   (get-buffer-create sclang-post-buffer))
@@ -543,9 +559,11 @@ if PRINT-P is non-nil. Return STRING if successful, otherwise nil."
   (let ((string (sclang-line-at-point)))
     (when string
       (sclang-eval-string string (not silent-p)))
+    (hlt-highlight-regexp-region (line-beginning-position) (line-end-position) ".+" 'eval-sclang-flash nil)
+    (run-at-time flash-time nil 'hlt-unhighlight-region nil nil nil)
     (and sclang-eval-line-forward
-	 (/= (line-end-position) (point-max))
-	 (forward-line 1))
+         (/= (line-end-position) (point-max))
+         (forward-line 1))
     string))
 
 (defun sclang-eval-region (&optional silent-p)
@@ -553,7 +571,9 @@ if PRINT-P is non-nil. Return STRING if successful, otherwise nil."
   (interactive "P")
   (sclang-eval-string
    (buffer-substring-no-properties (region-beginning) (region-end))
-   (not silent-p)))
+   (not silent-p))
+  (hlt-highlight-regexp-region (region-beginning) (region-end) ".+" 'eval-sclang-flash nil)
+  (run-at-time flash-time nil 'hlt-unhighlight-region nil nil nil))
 
 (defun sclang-eval-region-or-line (&optional silent-p)
   (interactive "P")
