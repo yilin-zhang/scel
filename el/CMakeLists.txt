@@ -1,4 +1,4 @@
-option(SC_EL_BYTECOMPILE "Build emacs-based IDE." ON)
+option(SC_EL_BYTECOMPILE "Build emacs-based IDE." OFF)
 mark_as_advanced(SC_EL_BYTECOMPILE)
 
 file(GLOB scel_sources
